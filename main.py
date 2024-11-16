@@ -1,13 +1,17 @@
 from fastapi import FastAPI
+from api.product import router
+from database.async_session import create_tables
+from api.category.endpoint import router as category_router
+
 
 app = FastAPI()
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+@app.on_event("startup")
+async def startup() -> None:
+    await create_tables()
+    print("Tables created successfully.")
 
 
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
+app.include_router(router)
+app.include_router(category_router)
